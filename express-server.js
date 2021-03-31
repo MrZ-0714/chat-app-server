@@ -1,22 +1,39 @@
 const express = require("express");
 const socket = require("socket.io");
-
 const app = express();
+const http = require("http").createServer(app);
+const io = socket(http);
+
 const port = 8080;
-const server = app.listen(port, () => {
-  console.log("Express server is listening on port: ", port);
-});
-//Static files
-app.use(express.static("public"));
 
-app.get("/", (req, res) => res.send("Ha"));
-
-app.get("/api/hey", (req, res) => {
-  res.send("ho!");
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/index.html");
 });
 
-const io = socket(server);
-io.on("connection", (socket) => console.log("Made socket connection", socket));
+io.on("connection", (socket) => {
+  console.log("A user connected");
+  io.emit("chat message", "You are connected to server");
+
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
+    io.emit("chat message", "A user discounnected");
+  });
+
+  socket.on("chat message", (msg) => {
+    console.log("Chat message is ", msg);
+    io.emit("chat message", msg);
+  });
+});
+
+http.listen(port, () => {
+  console.log("listening on *: ", port);
+});
+
+// app.get("/", (req, res) => res.send("Ha"));
+
+// app.get("/api/hey", (req, res) => {
+//   res.send("ho!");
+// });
 
 // import mongoose from "mongoose";
 // mongoose.connect("mongodb://localhost:27017/newTestDB", {
