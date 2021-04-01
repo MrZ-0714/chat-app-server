@@ -2,9 +2,17 @@ const express = require("express");
 const socket = require("socket.io");
 const app = express();
 const http = require("http").createServer(app);
-const io = socket(http);
+const io = socket(http, {
+  cors: {
+    origin: "http://localhost:3000",
+  },
+});
 
 const port = 8080;
+
+http.listen(port, () => {
+  console.log("listening on *: ", port);
+});
 
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
@@ -25,15 +33,9 @@ io.on("connection", (socket) => {
   });
 });
 
-http.listen(port, () => {
-  console.log("listening on *: ", port);
+app.get("/api/hey", (req, res) => {
+  res.send("ho!");
 });
-
-// app.get("/", (req, res) => res.send("Ha"));
-
-// app.get("/api/hey", (req, res) => {
-//   res.send("ho!");
-// });
 
 // import mongoose from "mongoose";
 // mongoose.connect("mongodb://localhost:27017/newTestDB", {
